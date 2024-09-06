@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vending Machine</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('https://wallpapercave.com/wp/wp9839023.jpg'); /* Vending machine background */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #fff; /* Text color for better readability on the background */
+        }
+
+        .container {
+            width: 80%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background for better contrast */
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6); /* Box shadow for depth */
+            position: relative; /* Position relative for absolute positioning of the bottle */
+        }
+
+        .title {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 30px;
+        }
+
+        .item {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .item h2 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .value {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .value::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -20px;
+            transform: translateY(-50%);
+            font-size: 24px;
+        }
+
+        .value.increase::after {
+            content: '🔼'; /* Up arrow emoji */
+        }
+
+        .value.decrease::after {
+            content: '🔽'; /* Down arrow emoji */
+        }
+
+        .logo {
+            max-width: 100px; /* Adjust size as needed */
+            margin-bottom: 20px;
+        }
+
+      
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            color: #fff;
+            display: none;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Vending Machine</h1>
+        <div class="item">
+            <img src="https://th.bing.com/th/id/R.0d07e2e6946a21bc836f3707964dd37c?rik=hI4xgvP5p74M%2fQ&riu=http%3a%2f%2f1000logos.net%2fwp-content%2fuploads%2f2017%2f05%2fnew-pepsi-logo.jpg&ehk=shzQ3IKQhREYZLhnRCukNMIaDqB4s9wSAWYsVTSNsAM%3d&risl=&pid=ImgRaw&r=0" alt="Pepsi Logo" class="logo"> <!-- Pepsi Logo -->
+            <h2>Pepsi</h2>
+            <p class="value" id="ultra" style="--percentage: 0;">0%</p>
+        </div>
+        <div class="item">
+            <img src="https://th.bing.com/th/id/OIP.n_7sK8Ek1IPisoQbDl0VGgHaGi?rs=1&pid=ImgDetMain" alt="String Logo" class="logo"> <!-- String Logo -->
+            <h2>String</h2>
+            <p class="value" id="ultra2" style="--percentage: 0;">0%</p>
+        </div>
+    </div>
+
+    <!-- Popup message -->
+    <div class="popup" id="popupMessage">
+        <p>The percentage is 0%. Please fill the vending machine.</p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_-UcF7ijqjCSEW7RsW0GEPlY_nydmVOk",
+            authDomain: "project01-494cd.firebaseapp.com",
+            databaseURL: "https://project01-494cd-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "project01-494cd",
+            storageBucket: "project01-494cd.appspot.com",
+            messagingSenderId: "851640036418",
+            appId: "1:851640036418:web:2bb3f75f2e6fd1082d91db",
+            measurementId: "G-FDHQT85HB6"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        var database = firebase.database();
+
+        var prevPercentage1 = 0; // Store previous percentage for Pepsi
+        var prevPercentage2 = 0; // Store previous percentage for String
+
+        var dataRef1 = database.ref('ULTRASONIC_DISTANCE');
+        dataRef1.on('value', function(getdata1) {
+            var ultr = getdata1.val();
+            var percentageChange = ultr - prevPercentage1; // Calculate percentage change
+            var valueElem = document.getElementById('ultra');
+            valueElem.innerHTML = ultr + "%";
+            valueElem.style.setProperty('--percentage', ultr);
+            updateArrow(valueElem, percentageChange); // Update arrow
+            prevPercentage1 = ultr;
+            if (ultr === 0) {
+                showPopup(); // Show popup if percentage is 0
+            }
+        });
+
+        var dataRef2 = database.ref('ULTRASONIC_DISTANCE2');
+        dataRef2.on('value', function(getdata2) {
+            var ultr2 = getdata2.val();
+            var percentageChange = ultr2 - prevPercentage2; // Calculate percentage change
+            var valueElem = document.getElementById('ultra2');
+            valueElem.innerHTML = ultr2 + "%";
+            valueElem.style.setProperty('--percentage', ultr2);
+            updateArrow(valueElem, percentageChange); // Update arrow
+            prevPercentage2 = ultr2;
+            if (ultr2 === 0) {
+                showPopup(); // Show popup if percentage is 0
+            }
+        });
+
+        
+
+        function updateArrow(elem, change) {
+            if (change > 0) {
+                elem.classList.add('increase'); // Add increase class for up arrow
+                elem.classList.remove('decrease');
+            } else if (change < 0) {
+                elem.classList.add('decrease'); // Add decrease class for down arrow
+                elem.classList.remove('increase');
+            } else {
+                elem.classList.remove('increase', 'decrease'); // Remove both classes if no change
+            }
+        }
+
+        // Function to show popup message
+        function showPopup() {
+            var popup = document.getElementById('popupMessage');
+            popup.style.display = 'block';
+            setTimeout(function() {
+                popup.style.display = 'none';
+            }, 3000); // Hide popup after 3 seconds
+        }
+    </script>
+</body>
+</html>
+

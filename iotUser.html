@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vending Machine</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('https://wallpaperaccess.com/full/7149246.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #fff;
+        }
+
+        .data-head {
+            margin: 50px auto;
+            width: fit-content;
+            text-align: center;
+            font-size: 45px;
+            font-weight: bold;
+            padding: 20px;
+            background-color: #3498db;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            background-image: linear-gradient(to right, #ff7e5f, #feb47b, #ffdc76, #a0e9af, #79cdcd, #a8c0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 2s infinite alternate;
+        }
+
+        .data-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .toggle-button, .toggle-button2 {
+            background-color: #27ae60;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .toggle-button:hover, .toggle-button2:hover {
+            background-color: #2ecc71;
+            transform: scale(1.1);
+        }
+
+        .logo {
+            width: 100px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        .coin-count {
+            font-size: 20px;
+            margin-bottom: 10px;
+            position: fixed;
+            top: 10px;
+            right: 10px;
+        }
+
+        .message {
+            font-size: 20px;
+            margin-top: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        @keyframes pulse {
+            0% {
+                text-shadow: 0 0 0 rgba(0,0,0,0.5);
+            }
+            50% {
+                text-shadow: 0 0 20px rgba(255,255,255,0.7), 0 0 30px rgba(255,255,255,0.7), 0 0 40px rgba(255,255,255,0.7), 0 0 50px rgba(255,255,255,0.7);
+            }
+            100% {
+                text-shadow: 0 0 0 rgba(0,0,0,0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="data-head" id="vendingMachineName">Civert Vending Machine</div>
+    <div class="data-container">
+        <div class="coin-count">Coins: <span id="coinCount">100</span></div>
+        <div class="button-container">
+            <img src="https://th.bing.com/th/id/R.0d07e2e6946a21bc836f3707964dd37c?rik=hI4xgvP5p74M%2fQ&riu=http%3a%2f%2f1000logos.net%2fwp-content%2fuploads%2f2017%2f05%2fnew-pepsi-logo.jpg&ehk=shzQ3IKQhREYZLhnRCukNMIaDqB4s9wSAWYsVTSNsAM%3d&risl=&pid=ImgRaw&r=0" alt="Pepsi Logo" class="logo">
+            <h2>Pepsi</h2>
+            <button class="toggle-button" id="toggleButton">Order Now</button>
+        </div>
+        <div class="button-container">
+            <img src="https://th.bing.com/th/id/OIP.n_7sK8Ek1IPisoQbDl0VGgHaGi?rs=1&pid=ImgDetMain" alt="String Logo" class="logo">
+            <h2>String</h2>
+            <button class="toggle-button2" id="toggleButton2">Order Now</button>
+        </div>
+        <div class="message" id="message">Your order is ready!</div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_-UcF7ijqjCSEW7RsW0GEPlY_nydmVOk",
+            authDomain: "project01-494cd.firebaseapp.com",
+            databaseURL: "https://project01-494cd-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "project01-494cd",
+            storageBucket: "project01-494cd.appspot.com",
+            messagingSenderId: "851640036418",
+            appId: "1:851640036418:web:2bb3f75f2e6fd1082d91db",
+            measurementId: "G-FDHQT85HB6"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        var database = firebase.database();
+
+        let coinCount = 100;
+
+        const digiRef = database.ref('WP/digital');
+        const toggleButton = document.getElementById("toggleButton");
+        toggleButton.addEventListener("click", () => {
+            if (coinCount >= 2) {
+                coinCount -= 2;
+                document.getElementById('coinCount').textContent = coinCount;
+                document.getElementById('message').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('message').style.display = 'none';
+                }, 2000);
+                digiRef.transaction(currentValue => !currentValue);
+            } else {
+                alert("Not enough coins!");
+            }
+        });
+
+        const digiRef2 = database.ref('WP2/digital');
+        const toggleButton2 = document.getElementById("toggleButton2");
+        toggleButton2.addEventListener("click", () => {
+            if (coinCount >= 2) {
+                coinCount -= 2;
+                document.getElementById('coinCount').textContent = coinCount;
+                document.getElementById('message').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('message').style.display = 'none';
+                }, 2000);
+                digiRef2.transaction(currentValue => !currentValue);
+            } else {
+                alert("Not enough coins!");
+            }
+        });
+    </script>
+</body>
+</html>

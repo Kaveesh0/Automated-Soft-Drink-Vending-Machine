@@ -7,9 +7,9 @@
 #define WIFI_SSID "Kaveesh's S10"
 #define WIFI_PASSWORD "01234567"
 // Insert Firebase project API Key
-#define API_KEY "AIzaSyC_-UcF7ijqjCSEW7RsW0GEPlY_nydmVOk"
+#define API_KEY "API KEY"
 // Insert RTDB URLefine the RTDB URL */
-#define DATABASE_URL "https://project01-494cd-default-rtdb.asia-southeast1.firebasedatabase.app/"
+#define DATABASE_URL "DATABASE URL/"
 
 #define TRIG_PIN 12 // Replace with your TRIG pin number
 #define ECHO_PIN 14 // Replace with your ECHO pin number
